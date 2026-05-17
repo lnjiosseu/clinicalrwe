@@ -1,0 +1,7 @@
+data/
+outputs/
+plots/
+.Rhistory
+.RData
+.Rproj.user/
+renv/library/

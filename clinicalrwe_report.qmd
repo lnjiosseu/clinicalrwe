@@ -1,0 +1,240 @@
+
+---
+title: "ClinicalRWE: Oncology Real-World Evidence Study"
+author: "Ludovic Njiosseu"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    theme: cosmo
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+# Executive Summary
+
+This project evaluates whether preventive maintenance biologic therapy delays disease progression in a simulated oncology real-world evidence cohort while accounting for:
+- treatment-selection bias
+- competing discontinuation events
+- missing clinical information
+- socioeconomic confounding
+
+The pipeline mirrors workflows used in oncology RWE, HEOR, and post-market comparative effectiveness studies.
+
+# Research Question
+
+Does receipt of preventive maintenance biologic therapy reduce progression risk after rigorous adjustment for:
+- demographic imbalance
+- treatment-selection bias
+- missing data
+- competing treatment discontinuation events?
+
+# Cohort Construction
+
+## Simulated Clinical Cohort
+
+The cohort contains 8,000 oncology patients with:
+- ECOG performance status
+- biomarker positivity
+- line of therapy
+- Charlson comorbidity burden
+- smoking status
+- payer category
+- socioeconomic indicators
+
+Patients receiving preventive biologic therapy differ systematically from controls, generating realistic confounding structures for causal inference analyses.
+
+## Clinical Endpoints
+
+### Primary Endpoint
+Time to disease progression.
+
+### Competing Event
+Treatment discontinuation due to adverse event or toxicity.
+
+# Methods
+
+## Module 1 — Clinical Cohort Construction
+
+```{r}
+library(tidyverse)
+
+cohort <- read_csv("data/cohort.csv", show_col_types = FALSE)
+
+glimpse(cohort)
+```
+
+The cohort-generation pipeline simulates:
+- confounded treatment assignment
+- Weibull-distributed progression outcomes
+- competing discontinuation events
+- structured missingness mechanisms
+
+# HEOR & Access Disparities
+
+## Therapy Access Profiling
+
+```{r}
+therapy_disp <- read_csv("outputs/therapy_disparities.csv",
+                         show_col_types = FALSE)
+
+head(therapy_disp)
+```
+
+The HEOR module evaluates:
+- therapy uptake disparities
+- payer-related treatment-access inequities
+- progression burden differences across demographic groups
+
+## Cost Disparities
+
+```{r}
+cost_tbl <- read_csv("outputs/cost_disparities.csv",
+                     show_col_types = FALSE)
+
+cost_tbl
+```
+
+# Survival Analysis
+
+## Kaplan-Meier Estimation
+
+```{r}
+knitr::include_graphics("plots/km_therapy.png")
+```
+
+Methods included:
+- Kaplan-Meier estimation
+- log-rank testing
+- Cox proportional hazards regression
+- Schoenfeld residual diagnostics
+
+## Cox Proportional Hazards Model
+
+```{r}
+cox_results <- read_csv("outputs/cox_results.csv",
+                        show_col_types = FALSE)
+
+cox_results
+```
+
+## Hazard Ratio Forest Plot
+
+```{r}
+knitr::include_graphics("plots/cox_forest.png")
+```
+
+# Causal Inference
+
+## Propensity Score Modeling
+
+```{r}
+ps <- read_csv("outputs/propensity_scores.csv",
+               show_col_types = FALSE)
+
+head(ps)
+```
+
+## Covariate Balance
+
+```{r}
+knitr::include_graphics("plots/covariate_balance.png")
+```
+
+## IPTW / AIPW Estimation
+
+```{r}
+causal <- read_csv("outputs/causal_estimates.csv",
+                   show_col_types = FALSE)
+
+causal
+```
+
+The causal inference pipeline includes:
+- positivity assessment
+- stabilized IPTW weighting
+- standardized mean difference evaluation
+- doubly robust AIPW estimation
+- E-value sensitivity analysis
+
+# Missing Data
+
+## Multiple Imputation
+
+Structured MCAR/MAR missingness was introduced into:
+- biomarker positivity
+- BMI
+- Charlson index
+- poverty variables
+
+Multiple imputation used:
+- MICE
+- predictive mean matching
+- Rubin pooled inference
+
+## MICE Comparison
+
+```{r}
+knitr::include_graphics("plots/mice_compare.png")
+```
+
+```{r}
+mice_tbl <- read_csv("outputs/complete_case_vs_mice.csv",
+                     show_col_types = FALSE)
+
+mice_tbl
+```
+
+# Competing Risks
+
+## Fine-Gray Subdistribution Hazards
+
+```{r}
+comp_tbl <- read_csv(
+  "outputs/competing_risk_model_comparison.csv",
+  show_col_types = FALSE
+)
+
+comp_tbl
+```
+
+## Competing-Risk Comparison Plot
+
+```{r}
+knitr::include_graphics("plots/competing_risks.png")
+```
+
+The competing-risks framework distinguishes:
+- disease progression
+- treatment discontinuation
+
+which is critical in oncology RWE analyses.
+
+# Regulatory Relevance
+
+This project mirrors workflows commonly used in:
+- oncology RWE
+- HEOR
+- observational comparative effectiveness studies
+- pharmacoepidemiology
+- post-market evidence generation
+
+Analyses are conceptually aligned with:
+- FDA RWE guidance
+- ICH E9(R1)
+- estimand-oriented clinical research principles
+
+# Conclusion
+
+This project demonstrates a complete pharmaceutical RWE workflow integrating:
+- survival analysis
+- causal inference
+- competing risks methodology
+- multiple imputation
+- HEOR disparity analysis
+- reproducible analytics pipelines
+
+within a portfolio-grade oncology evidence-generation framework.
