@@ -4,6 +4,9 @@
 # Simulated oncology RWE cohort generation
 # =============================================================================
 
+# Clear environment
+rm(list = ls())
+
 library(tidyverse)
 
 dir.create("data", showWarnings = FALSE)

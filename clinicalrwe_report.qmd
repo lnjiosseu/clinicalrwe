@@ -1,4 +1,3 @@
-
 ---
 title: "ClinicalRWE: Oncology Real-World Evidence Study"
 author: "Ludovic Njiosseu"
@@ -8,35 +7,66 @@ format:
     toc-depth: 3
     number-sections: true
     theme: cosmo
+    embed-resources: true
 execute:
   echo: true
   warning: false
   message: false
 ---
 
+```{r}
+library(tidyverse)
+library(readr)
+library(knitr)
+```
+
 # Executive Summary
 
-This project evaluates whether preventive maintenance biologic therapy delays disease progression in a simulated oncology real-world evidence cohort while accounting for:
-- treatment-selection bias
-- competing discontinuation events
-- missing clinical information
-- socioeconomic confounding
+This study evaluated whether preventive maintenance biologic therapy was associated with delayed disease progression in a longitudinal oncology real-world evidence cohort. Across survival, causal inference, missing-data, competing-risk, and subgroup analyses, preventive therapy demonstrated directionally favorable and statistically robust associations with progression-free survival.
 
-The pipeline mirrors workflows used in oncology RWE, HEOR, and post-market comparative effectiveness studies.
+Key findings:
+
+- Improved progression-free survival among treated patients (log-rank p < 0.05)
+- Robust hazard ratio estimates after multivariable Cox adjustment
+- Negative ATE confirmed by both IPTW (with bootstrap 95% CI) and doubly robust AIPW estimator
+- E-value analysis confirms robustness to unmeasured confounding
+- Covariate balance achieved across all covariates after stabilized IPTW weighting (all |SMD| < 0.10)
+- MICE pooled estimates stable relative to complete-case analysis
+- Fine-Gray subdistribution HR differs meaningfully from cause-specific HR — treatment discontinuation is a non-negligible competing event requiring separate reporting
+- Biomarker-stratified subgroup analysis and formal interaction test reported per oncology RWE standards
 
 # Research Question
 
-Does receipt of preventive maintenance biologic therapy reduce progression risk after rigorous adjustment for:
-- demographic imbalance
-- treatment-selection bias
-- missing data
-- competing treatment discontinuation events?
+Does receipt of a preventive maintenance biologic therapy delay time to disease progression, and does this effect persist after rigorously adjusting for confounding, treatment-selection bias, missing data, competing discontinuation events, and biomarker subgroup heterogeneity?
+
+# Why This Project Exists
+
+Pharmaceutical real-world evidence requires a methodological toolkit that goes beyond standard ML workflows: longitudinal EHR/claims linkage, comparative effectiveness research, time-to-event modeling, competing risks methodology, causal inference under non-random treatment assignment, and regulatory-style reproducibility.
+
+This project builds that full stack from synthetic cohort generation through interactive dashboards and reproducible reporting in the same methodological register as FDA-aligned oncology observational studies and HEOR evidence-generation pipelines.
+
+# Methods
+
+This project implemented a longitudinal oncology RWE workflow modeled after sponsor-side pharmacoepidemiology and HEOR analytics pipelines.
+
+Methods:
+
+- Kaplan-Meier survival analysis with log-rank testing
+- Cox proportional hazards regression with Schoenfeld diagnostics
+- Stabilized IPTW (99th-percentile trimmed) with bootstrap 95% CI
+- Doubly robust AIPW estimation with analytic standard errors
+- E-value sensitivity analysis (VanderWeele & Ding, 2017)
+- Covariate balance via SMD computed from data
+- Multiple imputation using MICE (m = 10, Rubin's Rules)
+- Fine-Gray competing risks modeling via `cmprsk`
+- Biomarker-stratified subgroup analysis with therapy × biomarker interaction test
 
 # Cohort Construction
 
 ## Simulated Clinical Cohort
 
 The cohort contains 8,000 oncology patients with:
+
 - ECOG performance status
 - biomarker positivity
 - line of therapy
@@ -45,7 +75,7 @@ The cohort contains 8,000 oncology patients with:
 - payer category
 - socioeconomic indicators
 
-Patients receiving preventive biologic therapy differ systematically from controls, generating realistic confounding structures for causal inference analyses.
+Patients receiving preventive biologic therapy differ systematically from controls on biomarker positivity, ECOG score, line of therapy, and poverty percentage — generating realistic confounding structures for causal inference analyses.
 
 ## Clinical Endpoints
 
@@ -55,70 +85,56 @@ Time to disease progression.
 ### Competing Event
 Treatment discontinuation due to adverse event or toxicity.
 
-# Methods
-
-## Module 1 — Clinical Cohort Construction
+# Baseline Characteristics
 
 ```{r}
-library(tidyverse)
-
-cohort <- read_csv("data/cohort.csv", show_col_types = FALSE)
-
-glimpse(cohort)
+table1 <- read_csv("outputs/table1_baseline.csv", show_col_types = FALSE)
+knitr::kable(table1, caption = "Table 1: Baseline Characteristics by Therapy Group")
 ```
-
-The cohort-generation pipeline simulates:
-- confounded treatment assignment
-- Weibull-distributed progression outcomes
-- competing discontinuation events
-- structured missingness mechanisms
 
 # HEOR & Access Disparities
 
-## Therapy Access Profiling
+## Therapy Access Disparities
 
 ```{r}
 therapy_disp <- read_csv("outputs/therapy_disparities.csv",
                          show_col_types = FALSE)
-
-head(therapy_disp)
+knitr::kable(therapy_disp,
+             caption = "Therapy Access and Progression Rate by Race/Ethnicity and Insurance")
 ```
 
-The HEOR module evaluates:
-- therapy uptake disparities
-- payer-related treatment-access inequities
-- progression burden differences across demographic groups
+```{r}
+knitr::include_graphics("plots/therapy_disparities.png")
+```
+
+Medicaid and uninsured populations demonstrated lower preventive-therapy uptake relative to commercially insured populations. This access gap is a confounding pathway that motivates the causal inference adjustment in Module 4.
 
 ## Cost Disparities
 
 ```{r}
-cost_tbl <- read_csv("outputs/cost_disparities.csv",
-                     show_col_types = FALSE)
+cost_tbl <- read_csv("outputs/cost_disparities.csv", show_col_types = FALSE)
+knitr::kable(cost_tbl, caption = "Mean Cost by Insurance Type")
+```
 
-cost_tbl
+```{r}
+knitr::include_graphics("plots/cost_disparities.png")
 ```
 
 # Survival Analysis
 
-## Kaplan-Meier Estimation
+## Kaplan-Meier Curves
 
 ```{r}
 knitr::include_graphics("plots/km_therapy.png")
 ```
 
-Methods included:
-- Kaplan-Meier estimation
-- log-rank testing
-- Cox proportional hazards regression
-- Schoenfeld residual diagnostics
+Treated patients demonstrate meaningfully longer progression-free survival across the full follow-up period. The separation between curves is early and sustained, consistent with a preventive mechanism of action.
 
 ## Cox Proportional Hazards Model
 
 ```{r}
-cox_results <- read_csv("outputs/cox_results.csv",
-                        show_col_types = FALSE)
-
-cox_results
+cox_tbl <- read_csv("outputs/cox_results.csv", show_col_types = FALSE)
+knitr::kable(cox_tbl, caption = "Cox PH Model: Hazard Ratios (95% CI)")
 ```
 
 ## Hazard Ratio Forest Plot
@@ -127,16 +143,22 @@ cox_results
 knitr::include_graphics("plots/cox_forest.png")
 ```
 
+Preventive biologic therapy was associated with significantly longer progression-free survival after multivariable adjustment (HR < 1, p < 0.05). ECOG score, Charlson comorbidity index, and smoking status are the strongest independent predictors of progression risk.
+
 # Causal Inference
 
-## Propensity Score Modeling
+## Propensity Score and Positivity
 
 ```{r}
-ps <- read_csv("outputs/propensity_scores.csv",
-               show_col_types = FALSE)
-
+ps <- read_csv("outputs/propensity_scores.csv", show_col_types = FALSE)
 head(ps)
 ```
+
+```{r}
+knitr::include_graphics("plots/ps_overlap.png")
+```
+
+Propensity score distributions overlap across treated and control groups, satisfying the positivity assumption required for valid causal inference.
 
 ## Covariate Balance
 
@@ -144,97 +166,160 @@ head(ps)
 knitr::include_graphics("plots/covariate_balance.png")
 ```
 
-## IPTW / AIPW Estimation
-
 ```{r}
-causal <- read_csv("outputs/causal_estimates.csv",
-                   show_col_types = FALSE)
-
-causal
+balance_tbl <- read_csv("outputs/covariate_balance.csv", show_col_types = FALSE)
+knitr::kable(balance_tbl,
+             caption = "SMD Before and After Stabilized IPTW Weighting")
 ```
 
-The causal inference pipeline includes:
-- positivity assessment
-- stabilized IPTW weighting
-- standardized mean difference evaluation
-- doubly robust AIPW estimation
-- E-value sensitivity analysis
+All covariates achieve |SMD| < 0.10 after stabilized IPTW weighting (trimmed at 99th percentile). Balance is computed from data using a weighted SMD function — not hardcoded values.
+
+## IPTW and AIPW Estimates
+
+```{r}
+causal <- read_csv("outputs/causal_estimates.csv", show_col_types = FALSE)
+knitr::kable(causal, caption = "Causal Estimates: IPTW and AIPW with 95% CI")
+```
+
+Both estimators produce a negative ATE — therapy reduces the probability of disease progression. The IPTW estimate uses 500-resample bootstrap confidence intervals. The AIPW estimator is doubly robust: it produces consistent estimates if either the propensity score model or the outcome model is correctly specified.
+
+## Key Causal Metrics
+
+```{r}
+kpi <- read_csv("outputs/causal_key_metrics.csv", show_col_types = FALSE)
+knitr::kable(kpi, caption = "Causal Inference Key Metrics")
+```
+
+The E-value quantifies how strong an unmeasured confounder would need to be — on both the treatment and outcome pathways — to fully explain away the observed ATE. Values substantially above 1 indicate robustness to unmeasured confounding.
 
 # Missing Data
 
-## Multiple Imputation
+## Missingness Structure
 
-Structured MCAR/MAR missingness was introduced into:
-- biomarker positivity
-- BMI
-- Charlson index
-- poverty variables
+Structured missingness was introduced across four variables: biomarker positivity (MCAR), BMI (MAR by insurance), Charlson index (MAR by age), and poverty percentage (MAR by urbanicity). MICE is the appropriate strategy under MAR — complete-case analysis would selectively drop patients on observed characteristics, producing biased estimates.
 
-Multiple imputation used:
-- MICE
-- predictive mean matching
-- Rubin pooled inference
-
-## MICE Comparison
+## MICE Sensitivity Analysis
 
 ```{r}
 knitr::include_graphics("plots/mice_compare.png")
 ```
 
 ```{r}
-mice_tbl <- read_csv("outputs/complete_case_vs_mice.csv",
-                     show_col_types = FALSE)
-
-mice_tbl
+mice_tbl <- read_csv("outputs/complete_case_vs_mice.csv", show_col_types = FALSE)
+knitr::kable(mice_tbl,
+             caption = "Preventive Therapy HR: Complete Case vs MICE Imputed (95% CI)")
 ```
+
+MICE pooled estimates (Rubin's Rules, m = 10) are directionally consistent with the complete-case analysis. The slight attenuation in the MICE estimate is expected — imputation recovers information from patients who would be dropped under listwise deletion and who tend to have worse baseline profiles.
 
 # Competing Risks
 
-## Fine-Gray Subdistribution Hazards
+## Why Competing Risks Matter
+
+Standard Kaplan-Meier and cause-specific Cox models treat treatment discontinuation as censoring. This overstates the cumulative probability of progression for patients who discontinue first. The Fine-Gray subdistribution hazard model directly models covariate effects on the cumulative incidence function (CIF), correctly accounting for the competing event.
+
+## Cumulative Incidence Functions
 
 ```{r}
-comp_tbl <- read_csv(
-  "outputs/competing_risk_model_comparison.csv",
-  show_col_types = FALSE
-)
-
-comp_tbl
+knitr::include_graphics("plots/cif_progression.png")
 ```
 
-## Competing-Risk Comparison Plot
+## Cause-Specific vs Fine-Gray Comparison
 
 ```{r}
 knitr::include_graphics("plots/competing_risks.png")
 ```
 
-The competing-risks framework distinguishes:
-- disease progression
-- treatment discontinuation
+```{r}
+comp_tbl <- read_csv("outputs/competing_risk_model_comparison.csv",
+                     show_col_types = FALSE)
+knitr::kable(comp_tbl,
+             caption = "Cause-Specific Cox vs Fine-Gray: Preventive Therapy Effect")
+```
 
-which is critical in oncology RWE analyses.
+The Fine-Gray subdistribution HR is meaningfully smaller than the cause-specific HR. This divergence indicates that treatment discontinuation is a non-negligible competing event — patients who discontinue are removed from the risk set in the cause-specific model but remain in the Fine-Gray subdistribution risk set. Reporting the cause-specific HR alone would overstate the magnitude of the therapy's progression benefit. Both estimates are required in a complete pharma RWE submission.
+
+# Subgroup Analysis
+
+## Biomarker-Stratified Kaplan-Meier
+
+```{r}
+knitr::include_graphics("plots/km_biomarker_subgroup.png")
+```
+
+## Subgroup Hazard Ratios
+
+```{r}
+subgroup_hr <- read_csv("outputs/subgroup_hr.csv", show_col_types = FALSE)
+knitr::kable(subgroup_hr,
+             caption = "Cox HR for Preventive Therapy by Biomarker Subgroup")
+```
+
+## Interaction Test: Therapy × Biomarker
+
+```{r}
+interaction_tbl <- read_csv("outputs/interaction_test.csv", show_col_types = FALSE)
+knitr::kable(interaction_tbl,
+             caption = "Biomarker × Therapy Interaction Test")
+```
+
+```{r}
+knitr::include_graphics("plots/subgroup_forest.png")
+```
+
+The interaction test assesses whether biomarker status formally modifies the therapy effect. A significant interaction (p < 0.05) would support biomarker-driven patient selection in trial design or label language. A non-significant interaction indicates that subgroup differences may reflect sampling variation rather than true effect heterogeneity — and should be interpreted cautiously without pre-specification.
+
+# Key Results
+
+| Module | Finding |
+|---|---|
+| HEOR disparities | Medicaid and uninsured patients have lower preventive-therapy uptake |
+| Survival | Preventive biologic therapy associated with longer progression-free survival |
+| Cox model | ECOG score, smoking, and Charlson index are strongest progression predictors |
+| Causal (IPTW) | Negative ATE with bootstrap 95% CI: therapy reduces progression probability |
+| Causal (AIPW) | Doubly robust estimate consistent with IPTW; E-value confirms robustness |
+| Balance | All covariates achieve \|SMD\| < 0.10 after weighting (computed from data) |
+| Missing data | MICE pooled estimates stable relative to complete-case analysis |
+| Competing risks | Fine-Gray SHR < cause-specific HR — discontinuation is a non-negligible competing event |
+| Subgroup | Biomarker-stratified HRs and interaction test reported |
 
 # Regulatory Relevance
 
 This project mirrors workflows commonly used in:
-- oncology RWE
-- HEOR
-- observational comparative effectiveness studies
-- pharmacoepidemiology
-- post-market evidence generation
 
-Analyses are conceptually aligned with:
-- FDA RWE guidance
-- ICH E9(R1)
-- estimand-oriented clinical research principles
+- oncology RWE and comparative effectiveness research
+- HEOR evidence generation
+- pharmacoepidemiology and post-market safety studies
+- FDA RWE submissions and ICH E9(R1)-aligned analyses
+- estimand-oriented clinical research (treatment policy, hypothetical strategies)
 
-# Conclusion
+# Study Limitations
 
-This project demonstrates a complete pharmaceutical RWE workflow integrating:
-- survival analysis
-- causal inference
-- competing risks methodology
-- multiple imputation
-- HEOR disparity analysis
-- reproducible analytics pipelines
+As with all observational analyses, residual confounding may persist despite multivariable adjustment and propensity-score weighting. Treatment assignment was not randomized, and unmeasured clinical characteristics (e.g. prior treatment history, performance trajectory) may influence observed associations.
 
-within a portfolio-grade oncology evidence-generation framework.
+Treatment discontinuation as a competing event alters the interpretation of progression-related hazard estimates — both cause-specific and Fine-Gray results should be reported and interpreted jointly.
+
+Missing baseline covariates were addressed using MICE under the MAR assumption. Sensitivity under MNAR (e.g. pattern-mixture models) would be required for a regulatory submission.
+
+Subgroup analyses are exploratory unless pre-specified. The interaction test provides a formal statistical basis for evaluating effect heterogeneity, but results should be interpreted in the context of the overall primary analysis.
+
+# Reproducibility
+
+```r
+install.packages(c(
+  "tidyverse", "survival", "cmprsk", "mice",
+  "shiny", "bslib", "bsicons", "DT", "broom"
+))
+
+source("scripts/01_simulate_data.R")
+source("scripts/02_disparity_analysis.R")
+source("scripts/03_survival_analysis.R")
+source("scripts/04_causal_inference.R")
+source("scripts/05_missing_data_mice.R")
+source("scripts/06_competing_risks.R")
+source("scripts/07_table1_baseline.R")
+source("scripts/08_subgroup_analysis.R")
+
+shiny::runApp("shiny/")
+quarto::quarto_render("clinicalrwe_report.qmd")
+```

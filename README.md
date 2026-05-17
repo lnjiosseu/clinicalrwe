@@ -1,7 +1,6 @@
-
 # ClinicalRWE: Oncology Survival, Causal Inference & Competing Risks Pipeline
 
-An end-to-end pharmaceutical real-world evidence (RWE) pipeline on a simulated longitudinal oncology cohort of 8,000 patients - built in R, covering HEOR disparity analysis, Kaplan-Meier and Cox PH survival analysis, IPTW / doubly robust causal inference (AIPW), MICE multiple imputation, and Fine-Gray competing risks modeling.
+An end-to-end pharmaceutical real-world evidence (RWE) pipeline on a simulated longitudinal oncology cohort of 8,000 patients - built in R, covering HEOR disparity analysis, Kaplan-Meier and Cox PH survival analysis, IPTW / doubly robust causal inference (AIPW), MICE multiple imputation, Fine-Gray competing risks modeling, and biomarker-stratified subgroup analysis with interaction testing.
 
 Directly mirrors workflows used in oncology RWE, HEOR, and regulatory-grade post-market effectiveness studies across pharmaceutical and biotech organizations.
 
@@ -9,7 +8,35 @@ Directly mirrors workflows used in oncology RWE, HEOR, and regulatory-grade post
 
 ## Research Question
 
-Does receipt of a preventive maintenance biologic therapy delay time to disease progression, and does this effect persist after rigorously adjusting for confounding, treatment-selection bias, missing data, and competing discontinuation events?
+Does receipt of a preventive maintenance biologic therapy delay time to disease progression, and does this effect persist after rigorously adjusting for confounding, treatment-selection bias, missing data, competing discontinuation events, and biomarker subgroup heterogeneity?
+
+---
+
+## Study Design
+
+Retrospective longitudinal oncology cohort study using a simulated real-world evidence dataset modeled after integrated EHR and claims environments.
+
+### Population
+Adult oncology patients receiving longitudinal follow-up across multiple lines of therapy.
+
+### Exposure
+Receipt of preventive maintenance biologic therapy.
+
+### Primary Endpoint
+Time to disease progression.
+
+### Secondary Endpoint
+Treatment discontinuation due to adverse event or toxicity.
+
+### Statistical Framework
+- Kaplan-Meier survival analysis
+- Cox proportional hazards modeling
+- Stabilized IPTW with trimmed weights
+- Doubly robust AIPW estimation with analytic 95% CI
+- E-value sensitivity analysis
+- Multiple imputation using MICE (m = 10, Rubin's Rules)
+- Fine-Gray competing risks regression
+- Biomarker-stratified subgroup analysis with interaction test
 
 ---
 
@@ -46,26 +73,36 @@ This project builds that full stack - from synthetic cohort generation through i
 
 **Module 4 - Causal Inference**
 - Propensity score estimation with positivity assessment
-- Stabilized IPTW weighting
-- Standardized mean difference (SMD) balance assessment
-- IPTW-weighted average treatment effect (ATE)
-- Doubly robust AIPW estimator
-- E-value sensitivity analysis for unmeasured confounding
+- Stabilized IPTW weighting with 99th-percentile trimming
+- Covariate balance (SMD) computed from data — not hardcoded
+- IPTW-weighted ATE with bootstrap 95% CI (500 resamples)
+- Doubly robust AIPW estimator with analytic standard errors and 95% CI
+- E-value sensitivity analysis (VanderWeele & Ding, 2017)
 
 **Module 5 - Missing Data**
-- Structured MCAR/MAR missingness generation
-- Multiple imputation using MICE (m = 10)
-- Rubin pooled inference
-- Complete-case vs imputed estimate comparison
+- Structured MCAR/MAR missingness across biomarker, BMI, Charlson index, poverty
+- Multiple imputation using MICE (m = 10, predictive mean matching)
+- Rubin's Rules pooled Cox inference
+- Complete-case vs MICE HR comparison with 95% CI
 
 **Module 6 - Competing Risks**
-- Cause-specific Cox regression
-- Fine-Gray subdistribution hazard modeling
-- Cumulative incidence functions (CIF)
-- Disease progression vs treatment discontinuation comparison
+- Cumulative incidence functions (CIF) for progression and discontinuation
+- Gray's test for CIF equality across therapy groups
+- Fine-Gray subdistribution hazard model run from data via `cmprsk`
+- Cause-specific Cox for direct comparison
+- Narrative interpretation of Fine-Gray vs cause-specific divergence
+
+**Module 7 - Baseline Characteristics Table**
+- Table 1 by therapy group: age, sex, BMI, ECOG, biomarker, Charlson, smoking, payer
+
+**Module 8 - Subgroup Analysis**
+- Biomarker-stratified Kaplan-Meier curves with log-rank tests
+- Subgroup-specific Cox HRs (Biomarker+, Biomarker−, Overall)
+- Formal interaction test: therapy × biomarker_positive
+- Faceted KM plot and subgroup forest plot with interaction p annotated
 
 **Deliverables**
-- Interactive Shiny dashboard (7 tabs: Overview, HEOR Disparities, Survival Analysis, Causal Inference, Missing Data, Competing Risks, Patient Explorer)
+- Interactive Shiny dashboard (8 tabs: Overview, Baseline, HEOR, Survival, Causal Inference, Missing Data, Competing Risks, Subgroup Analysis)
 - Quarto HTML report with reproducible code, figures, diagnostics, and methods narrative
 
 ---
@@ -77,11 +114,12 @@ This project builds that full stack - from synthetic cohort generation through i
 | HEOR disparities | Medicaid and uninsured patients have lower preventive-therapy uptake |
 | Survival | Preventive biologic therapy associated with longer progression-free survival |
 | Cox model | ECOG score, smoking, and Charlson index are strongest progression predictors |
-| Causal (IPTW) | Negative ATE: therapy reduces progression probability |
-| Causal (AIPW) | Doubly robust estimate consistent with IPTW findings |
+| Causal (IPTW) | Negative ATE with bootstrap 95% CI: therapy reduces progression probability |
+| Causal (AIPW) | Doubly robust estimate consistent with IPTW; E-value confirms robustness to unmeasured confounding |
+| Balance | All covariates achieve \|SMD\| < 0.10 after weighting (computed from data) |
 | Missing data | MICE pooled estimates remain directionally consistent with complete-case analysis |
-| Competing risks | Fine-Gray estimates differ from cause-specific hazards after accounting for discontinuation |
-| Balance | All major covariates achieve \|SMD\| < 0.10 after weighting |
+| Competing risks | Fine-Gray SHR differs from cause-specific HR — discontinuation is a non-negligible competing event |
+| Subgroup | Biomarker-stratified HRs and formal interaction test reported |
 
 ---
 
@@ -93,16 +131,16 @@ This project builds that full stack - from synthetic cohort generation through i
 | Survival analysis | Kaplan-Meier estimator, log-rank test |
 | Multivariable survival | Cox proportional hazards model (Efron tie-handling) |
 | PH diagnostics | Schoenfeld residuals (cox.zph) |
-| Competing risks | Fine-Gray subdistribution hazards |
-| Missing data | MICE multiple imputation |
-| Pooling | Rubin's Rules |
 | Causal identification | Conditional exchangeability + positivity |
 | Propensity score | Logistic regression |
-| Weighting | Stabilized IPTW |
-| Balance assessment | Standardized mean differences (SMD) |
-| Causal estimator 1 | IPTW-weighted outcome model |
-| Causal estimator 2 | Augmented IPW (AIPW) - doubly robust |
+| Weighting | Stabilized IPTW (trimmed at 99th percentile) |
+| Balance assessment | Standardized mean differences (SMD) — computed from data |
+| Causal estimator 1 | IPTW-weighted ATE + bootstrap 95% CI (500 resamples) |
+| Causal estimator 2 | Augmented IPW (AIPW) — doubly robust, analytic SE |
 | Sensitivity analysis | E-value (VanderWeele & Ding, 2017) |
+| Missing data | MICE (m=10), predictive mean matching, Rubin's Rules |
+| Competing risks | CIF, Gray's test, Fine-Gray subdistribution hazards (cmprsk) |
+| Subgroup analysis | Stratified Cox HRs, biomarker × therapy interaction test |
 | Visualization | ggplot2, Shiny, bslib |
 | Standards alignment | ICH E9(R1), FDA RWE guidance |
 
@@ -118,13 +156,15 @@ clinicalrwe/
 │   ├── 03_survival_analysis.R
 │   ├── 04_causal_inference.R
 │   ├── 05_missing_data_mice.R
-│   └── 06_competing_risks.R
+│   ├── 06_competing_risks.R
+│   ├── 07_table1_baseline.R
+│   └── 08_subgroup_analysis.R
 ├── data/                         # Generated datasets (git-ignored)
 ├── outputs/                      # CSV/model artifacts (git-ignored)
 ├── plots/                        # Publication/dashboard figures
 ├── shiny/
 │   └── app.R
-├── pubhealth_report.qmd
+├── clinicalrwe_report.qmd
 ├── README.md
 └── clinicalrwe.Rproj
 ```
@@ -136,8 +176,8 @@ clinicalrwe/
 ```r
 # Install dependencies
 install.packages(c(
-  "tidyverse","survival","cmprsk","mice",
-  "shiny","bslib","bsicons","DT","broom"
+  "tidyverse", "survival", "cmprsk", "mice",
+  "shiny", "bslib", "bsicons", "DT", "broom"
 ))
 
 # Run scripts sequentially
@@ -147,6 +187,8 @@ source("scripts/03_survival_analysis.R")
 source("scripts/04_causal_inference.R")
 source("scripts/05_missing_data_mice.R")
 source("scripts/06_competing_risks.R")
+source("scripts/07_table1_baseline.R")
+source("scripts/08_subgroup_analysis.R")
 
 # Launch dashboard
 shiny::runApp("shiny/")
