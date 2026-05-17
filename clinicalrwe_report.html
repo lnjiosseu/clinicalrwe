@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Ludovic Njiosseu">
+
+<title>ClinicalRWE: Oncology Real-World Evidence Study</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="clinicalrwe_report_files/libs/clipboard/clipboard.min.js"></script>
+<script src="clinicalrwe_report_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="clinicalrwe_report_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="clinicalrwe_report_files/libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="clinicalrwe_report_files/libs/quarto-html/popper.min.js"></script>
+<script src="clinicalrwe_report_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="clinicalrwe_report_files/libs/quarto-html/anchor.min.js"></script>
+<link href="clinicalrwe_report_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="clinicalrwe_report_files/libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="clinicalrwe_report_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="clinicalrwe_report_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="clinicalrwe_report_files/libs/bootstrap/bootstrap-a74871fe4945b66d259aafc266475145.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#executive-summary" id="toc-executive-summary" class="nav-link active" data-scroll-target="#executive-summary"><span class="header-section-number">1</span> Executive Summary</a></li>
+  <li><a href="#research-question" id="toc-research-question" class="nav-link" data-scroll-target="#research-question"><span class="header-section-number">2</span> Research Question</a></li>
+  <li><a href="#cohort-construction" id="toc-cohort-construction" class="nav-link" data-scroll-target="#cohort-construction"><span class="header-section-number">3</span> Cohort Construction</a>
+  <ul class="collapse">
+  <li><a href="#simulated-clinical-cohort" id="toc-simulated-clinical-cohort" class="nav-link" data-scroll-target="#simulated-clinical-cohort"><span class="header-section-number">3.1</span> Simulated Clinical Cohort</a></li>
+  <li><a href="#clinical-endpoints" id="toc-clinical-endpoints" class="nav-link" data-scroll-target="#clinical-endpoints"><span class="header-section-number">3.2</span> Clinical Endpoints</a>
+  <ul class="collapse">
+  <li><a href="#primary-endpoint" id="toc-primary-endpoint" class="nav-link" data-scroll-target="#primary-endpoint"><span class="header-section-number">3.2.1</span> Primary Endpoint</a></li>
+  <li><a href="#competing-event" id="toc-competing-event" class="nav-link" data-scroll-target="#competing-event"><span class="header-section-number">3.2.2</span> Competing Event</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods"><span class="header-section-number">4</span> Methods</a>
+  <ul class="collapse">
+  <li><a href="#module-1-clinical-cohort-construction" id="toc-module-1-clinical-cohort-construction" class="nav-link" data-scroll-target="#module-1-clinical-cohort-construction"><span class="header-section-number">4.1</span> Module 1 — Clinical Cohort Construction</a></li>
+  </ul></li>
+  <li><a href="#heor-access-disparities" id="toc-heor-access-disparities" class="nav-link" data-scroll-target="#heor-access-disparities"><span class="header-section-number">5</span> HEOR &amp; Access Disparities</a>
+  <ul class="collapse">
+  <li><a href="#therapy-access-profiling" id="toc-therapy-access-profiling" class="nav-link" data-scroll-target="#therapy-access-profiling"><span class="header-section-number">5.1</span> Therapy Access Profiling</a></li>
+  <li><a href="#cost-disparities" id="toc-cost-disparities" class="nav-link" data-scroll-target="#cost-disparities"><span class="header-section-number">5.2</span> Cost Disparities</a></li>
+  </ul></li>
+  <li><a href="#survival-analysis" id="toc-survival-analysis" class="nav-link" data-scroll-target="#survival-analysis"><span class="header-section-number">6</span> Survival Analysis</a>
+  <ul class="collapse">
+  <li><a href="#kaplan-meier-estimation" id="toc-kaplan-meier-estimation" class="nav-link" data-scroll-target="#kaplan-meier-estimation"><span class="header-section-number">6.1</span> Kaplan-Meier Estimation</a></li>
+  <li><a href="#cox-proportional-hazards-model" id="toc-cox-proportional-hazards-model" class="nav-link" data-scroll-target="#cox-proportional-hazards-model"><span class="header-section-number">6.2</span> Cox Proportional Hazards Model</a></li>
+  <li><a href="#hazard-ratio-forest-plot" id="toc-hazard-ratio-forest-plot" class="nav-link" data-scroll-target="#hazard-ratio-forest-plot"><span class="header-section-number">6.3</span> Hazard Ratio Forest Plot</a></li>
+  </ul></li>
+  <li><a href="#causal-inference" id="toc-causal-inference" class="nav-link" data-scroll-target="#causal-inference"><span class="header-section-number">7</span> Causal Inference</a>
+  <ul class="collapse">
+  <li><a href="#propensity-score-modeling" id="toc-propensity-score-modeling" class="nav-link" data-scroll-target="#propensity-score-modeling"><span class="header-section-number">7.1</span> Propensity Score Modeling</a></li>
+  <li><a href="#covariate-balance" id="toc-covariate-balance" class="nav-link" data-scroll-target="#covariate-balance"><span class="header-section-number">7.2</span> Covariate Balance</a></li>
+  <li><a href="#iptw-aipw-estimation" id="toc-iptw-aipw-estimation" class="nav-link" data-scroll-target="#iptw-aipw-estimation"><span class="header-section-number">7.3</span> IPTW / AIPW Estimation</a></li>
+  </ul></li>
+  <li><a href="#missing-data" id="toc-missing-data" class="nav-link" data-scroll-target="#missing-data"><span class="header-section-number">8</span> Missing Data</a>
+  <ul class="collapse">
+  <li><a href="#multiple-imputation" id="toc-multiple-imputation" class="nav-link" data-scroll-target="#multiple-imputation"><span class="header-section-number">8.1</span> Multiple Imputation</a></li>
+  <li><a href="#mice-comparison" id="toc-mice-comparison" class="nav-link" data-scroll-target="#mice-comparison"><span class="header-section-number">8.2</span> MICE Comparison</a></li>
+  </ul></li>
+  <li><a href="#competing-risks" id="toc-competing-risks" class="nav-link" data-scroll-target="#competing-risks"><span class="header-section-number">9</span> Competing Risks</a>
+  <ul class="collapse">
+  <li><a href="#fine-gray-subdistribution-hazards" id="toc-fine-gray-subdistribution-hazards" class="nav-link" data-scroll-target="#fine-gray-subdistribution-hazards"><span class="header-section-number">9.1</span> Fine-Gray Subdistribution Hazards</a></li>
+  <li><a href="#competing-risk-comparison-plot" id="toc-competing-risk-comparison-plot" class="nav-link" data-scroll-target="#competing-risk-comparison-plot"><span class="header-section-number">9.2</span> Competing-Risk Comparison Plot</a></li>
+  </ul></li>
+  <li><a href="#regulatory-relevance" id="toc-regulatory-relevance" class="nav-link" data-scroll-target="#regulatory-relevance"><span class="header-section-number">10</span> Regulatory Relevance</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion"><span class="header-section-number">11</span> Conclusion</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">ClinicalRWE: Oncology Real-World Evidence Study</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Ludovic Njiosseu </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="executive-summary" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> Executive Summary</h1>
+<p>This project evaluates whether preventive maintenance biologic therapy delays disease progression in a simulated oncology real-world evidence cohort while accounting for: - treatment-selection bias - competing discontinuation events - missing clinical information - socioeconomic confounding</p>
+<p>The pipeline mirrors workflows used in oncology RWE, HEOR, and post-market comparative effectiveness studies.</p>
+</section>
+<section id="research-question" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Research Question</h1>
+<p>Does receipt of preventive maintenance biologic therapy reduce progression risk after rigorous adjustment for: - demographic imbalance - treatment-selection bias - missing data - competing treatment discontinuation events?</p>
+</section>
+<section id="cohort-construction" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Cohort Construction</h1>
+<section id="simulated-clinical-cohort" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="simulated-clinical-cohort"><span class="header-section-number">3.1</span> Simulated Clinical Cohort</h2>
+<p>The cohort contains 8,000 oncology patients with: - ECOG performance status - biomarker positivity - line of therapy - Charlson comorbidity burden - smoking status - payer category - socioeconomic indicators</p>
+<p>Patients receiving preventive biologic therapy differ systematically from controls, generating realistic confounding structures for causal inference analyses.</p>
+</section>
+<section id="clinical-endpoints" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="clinical-endpoints"><span class="header-section-number">3.2</span> Clinical Endpoints</h2>
+<section id="primary-endpoint" class="level3" data-number="3.2.1">
+<h3 data-number="3.2.1" class="anchored" data-anchor-id="primary-endpoint"><span class="header-section-number">3.2.1</span> Primary Endpoint</h3>
+<p>Time to disease progression.</p>
+</section>
+<section id="competing-event" class="level3" data-number="3.2.2">
+<h3 data-number="3.2.2" class="anchored" data-anchor-id="competing-event"><span class="header-section-number">3.2.2</span> Competing Event</h3>
+<p>Treatment discontinuation due to adverse event or toxicity.</p>
+</section>
+</section>
+</section>
+<section id="methods" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Methods</h1>
+<section id="module-1-clinical-cohort-construction" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="module-1-clinical-cohort-construction"><span class="header-section-number">4.1</span> Module 1 — Clinical Cohort Construction</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>cohort <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/cohort.csv"</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(cohort)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 8,000
+Columns: 17
+$ patient_id                &lt;chr&gt; "PT00001", "PT00002", "PT00003", "PT00004", …
+$ age                       &lt;dbl&gt; 78, 58, 68, 70, 68, 63, 79, 63, 84, 63, 77, …
+$ sex                       &lt;chr&gt; "Male", "Male", "Female", "Male", "Male", "M…
+$ race_ethnicity            &lt;chr&gt; "White", "White", "Hispanic", "White", "Blac…
+$ insurance_type            &lt;chr&gt; "Commercial", "Commercial", "Commercial", "M…
+$ ecog_score                &lt;dbl&gt; 1, 1, 0, 2, 0, 1, 0, 1, 2, 0, 0, 1, 0, 1, 3,…
+$ biomarker_positive        &lt;dbl&gt; 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0,…
+$ line_of_therapy           &lt;dbl&gt; 1, 1, 2, 1, 2, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1,…
+$ smoking_status            &lt;chr&gt; "Former", "Former", "Never", "Never", "Never…
+$ bmi                       &lt;dbl&gt; 22.0, 21.5, 24.4, 28.1, NA, 27.2, 31.4, 33.5…
+$ poverty_pct               &lt;dbl&gt; 0.984, 0.438, 0.943, 0.732, 0.084, 0.664, 0.…
+$ charlson_index            &lt;dbl&gt; 0, 2, 2, 4, 2, 6, NA, 3, 0, 4, NA, 2, 3, 1, …
+$ preventive_therapy        &lt;dbl&gt; 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0,…
+$ observed_time             &lt;dbl&gt; 12.115692, 36.973918, 14.205787, 8.823530, 6…
+$ event_type                &lt;dbl&gt; 1, 1, 2, 1, 1, 2, 1, 2, 2, 1, 1, 1, 1, 1, 2,…
+$ disease_progression       &lt;dbl&gt; 1, 1, 0, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0,…
+$ treatment_discontinuation &lt;dbl&gt; 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1,…</code></pre>
+</div>
+</div>
+<p>The cohort-generation pipeline simulates: - confounded treatment assignment - Weibull-distributed progression outcomes - competing discontinuation events - structured missingness mechanisms</p>
+</section>
+</section>
+<section id="heor-access-disparities" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> HEOR &amp; Access Disparities</h1>
+<section id="therapy-access-profiling" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="therapy-access-profiling"><span class="header-section-number">5.1</span> Therapy Access Profiling</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>therapy_disp <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"outputs/therapy_disparities.csv"</span>,</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                         <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(therapy_disp)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 5
+  race_ethnicity insurance_type     n therapy_rate progression_rate
+  &lt;chr&gt;          &lt;chr&gt;          &lt;dbl&gt;        &lt;dbl&gt;            &lt;dbl&gt;
+1 Asian          Commercial       268         30.6             61.9
+2 Asian          Medicaid          80         41.2             45  
+3 Asian          Medicare         249         32.5             49.8
+4 Black          Commercial       517         31.3             56.7
+5 Black          Medicaid         180         29.4             59.4
+6 Black          Medicare         548         30.5             56.0</code></pre>
+</div>
+</div>
+<p>The HEOR module evaluates: - therapy uptake disparities - payer-related treatment-access inequities - progression burden differences across demographic groups</p>
+</section>
+<section id="cost-disparities" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="cost-disparities"><span class="header-section-number">5.2</span> Cost Disparities</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>cost_tbl <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"outputs/cost_disparities.csv"</span>,</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>cost_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 2
+  insurance_type mean_cost
+  &lt;chr&gt;              &lt;dbl&gt;
+1 Commercial        15898.
+2 Medicaid          16252.
+3 Medicare          16122.</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="survival-analysis" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Survival Analysis</h1>
+<section id="kaplan-meier-estimation" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="kaplan-meier-estimation"><span class="header-section-number">6.1</span> Kaplan-Meier Estimation</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">include_graphics</span>(<span class="st">"plots/km_therapy.png"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="plots/km_therapy.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Methods included: - Kaplan-Meier estimation - log-rank testing - Cox proportional hazards regression - Schoenfeld residual diagnostics</p>
+</section>
+<section id="cox-proportional-hazards-model" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="cox-proportional-hazards-model"><span class="header-section-number">6.2</span> Cox Proportional Hazards Model</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cox_results <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"outputs/cox_results.csv"</span>,</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                        <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>cox_results</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 5
+  variable              hr hr_lower95 hr_upper95 p_value
+  &lt;chr&gt;              &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;
+1 preventive_therapy 0.602      0.555      0.652  0     
+2 age                0.998      0.995      1.00   0.374 
+3 ecog_score         1.30       1.26       1.36   0     
+4 biomarker_positive 1.06       0.994      1.14   0.075 
+5 charlson_index     1.11       1.09       1.14   0     
+6 bmi                0.992      0.985      0.999  0.0208</code></pre>
+</div>
+</div>
+</section>
+<section id="hazard-ratio-forest-plot" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="hazard-ratio-forest-plot"><span class="header-section-number">6.3</span> Hazard Ratio Forest Plot</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">include_graphics</span>(<span class="st">"plots/cox_forest.png"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="plots/cox_forest.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="causal-inference" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Causal Inference</h1>
+<section id="propensity-score-modeling" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="propensity-score-modeling"><span class="header-section-number">7.1</span> Propensity Score Modeling</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ps <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"outputs/propensity_scores.csv"</span>,</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(ps)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 4
+  patient_id preventive_therapy    ps  iptw
+  &lt;chr&gt;                   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 PT00001                     0 0.271  1.37
+2 PT00002                     1 0.279  3.59
+3 PT00003                     1 0.336  2.98
+4 PT00004                     1 0.244  4.09
+5 PT00006                     1 0.290  3.45
+6 PT00008                     1 0.290  3.44</code></pre>
+</div>
+</div>
+</section>
+<section id="covariate-balance" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="covariate-balance"><span class="header-section-number">7.2</span> Covariate Balance</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">include_graphics</span>(<span class="st">"plots/covariate_balance.png"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="plots/covariate_balance.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="iptw-aipw-estimation" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="iptw-aipw-estimation"><span class="header-section-number">7.3</span> IPTW / AIPW Estimation</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>causal <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"outputs/causal_estimates.csv"</span>,</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>                   <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>causal</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  estimator    ate
+  &lt;chr&gt;      &lt;dbl&gt;
+1 IPTW      -0.188
+2 AIPW      -0.182</code></pre>
+</div>
+</div>
+<p>The causal inference pipeline includes: - positivity assessment - stabilized IPTW weighting - standardized mean difference evaluation - doubly robust AIPW estimation - E-value sensitivity analysis</p>
+</section>
+</section>
+<section id="missing-data" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Missing Data</h1>
+<section id="multiple-imputation" class="level2" data-number="8.1">
+<h2 data-number="8.1" class="anchored" data-anchor-id="multiple-imputation"><span class="header-section-number">8.1</span> Multiple Imputation</h2>
+<p>Structured MCAR/MAR missingness was introduced into: - biomarker positivity - BMI - Charlson index - poverty variables</p>
+<p>Multiple imputation used: - MICE - predictive mean matching - Rubin pooled inference</p>
+</section>
+<section id="mice-comparison" class="level2" data-number="8.2">
+<h2 data-number="8.2" class="anchored" data-anchor-id="mice-comparison"><span class="header-section-number">8.2</span> MICE Comparison</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">include_graphics</span>(<span class="st">"plots/mice_compare.png"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="plots/mice_compare.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>mice_tbl <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"outputs/complete_case_vs_mice.csv"</span>,</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>mice_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  analysis         hr
+  &lt;chr&gt;         &lt;dbl&gt;
+1 Complete Case  0.82
+2 MICE Imputed   0.79</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="competing-risks" class="level1" data-number="9">
+<h1 data-number="9"><span class="header-section-number">9</span> Competing Risks</h1>
+<section id="fine-gray-subdistribution-hazards" class="level2" data-number="9.1">
+<h2 data-number="9.1" class="anchored" data-anchor-id="fine-gray-subdistribution-hazards"><span class="header-section-number">9.1</span> Fine-Gray Subdistribution Hazards</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>comp_tbl <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"outputs/competing_risk_model_comparison.csv"</span>,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">show_col_types =</span> <span class="cn">FALSE</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>comp_tbl</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  model              estimate
+  &lt;chr&gt;                 &lt;dbl&gt;
+1 Cause-Specific Cox    0.81 
+2 Fine-Gray             0.588</code></pre>
+</div>
+</div>
+</section>
+<section id="competing-risk-comparison-plot" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="competing-risk-comparison-plot"><span class="header-section-number">9.2</span> Competing-Risk Comparison Plot</h2>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">include_graphics</span>(<span class="st">"plots/competing_risks.png"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="plots/competing_risks.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The competing-risks framework distinguishes: - disease progression - treatment discontinuation</p>
+<p>which is critical in oncology RWE analyses.</p>
+</section>
+</section>
+<section id="regulatory-relevance" class="level1" data-number="10">
+<h1 data-number="10"><span class="header-section-number">10</span> Regulatory Relevance</h1>
+<p>This project mirrors workflows commonly used in: - oncology RWE - HEOR - observational comparative effectiveness studies - pharmacoepidemiology - post-market evidence generation</p>
+<p>Analyses are conceptually aligned with: - FDA RWE guidance - ICH E9(R1) - estimand-oriented clinical research principles</p>
+</section>
+<section id="conclusion" class="level1" data-number="11">
+<h1 data-number="11"><span class="header-section-number">11</span> Conclusion</h1>
+<p>This project demonstrates a complete pharmaceutical RWE workflow integrating: - survival analysis - causal inference - competing risks methodology - multiple imputation - HEOR disparity analysis - reproducible analytics pipelines</p>
+<p>within a portfolio-grade oncology evidence-generation framework.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

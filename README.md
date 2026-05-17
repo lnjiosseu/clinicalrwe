@@ -1,7 +1,7 @@
 
 # ClinicalRWE: Oncology Survival, Causal Inference & Competing Risks Pipeline
 
-An end-to-end pharmaceutical real-world evidence (RWE) pipeline on a simulated longitudinal oncology cohort of 8,000 patients — built in R, covering HEOR disparity analysis, Kaplan-Meier and Cox PH survival analysis, IPTW / doubly robust causal inference (AIPW), MICE multiple imputation, and Fine-Gray competing risks modeling.
+An end-to-end pharmaceutical real-world evidence (RWE) pipeline on a simulated longitudinal oncology cohort of 8,000 patients - built in R, covering HEOR disparity analysis, Kaplan-Meier and Cox PH survival analysis, IPTW / doubly robust causal inference (AIPW), MICE multiple imputation, and Fine-Gray competing risks modeling.
 
 Directly mirrors workflows used in oncology RWE, HEOR, and regulatory-grade post-market effectiveness studies across pharmaceutical and biotech organizations.
 
@@ -17,13 +17,13 @@ Does receipt of a preventive maintenance biologic therapy delay time to disease 
 
 Pharmaceutical real-world evidence requires a methodological toolkit that goes beyond standard ML workflows: longitudinal EHR/claims linkage, comparative effectiveness research, time-to-event modeling, competing risks methodology, causal inference under non-random treatment assignment, and regulatory-style reproducibility.
 
-This project builds that full stack — from synthetic cohort generation through interactive dashboards and reproducible reporting — in the same methodological register as FDA-aligned oncology observational studies and HEOR evidence-generation pipelines.
+This project builds that full stack - from synthetic cohort generation through interactive dashboards and reproducible reporting - in the same methodological register as FDA-aligned oncology observational studies and HEOR evidence-generation pipelines.
 
 ---
 
 ## What It Does
 
-**Module 1 — Clinical Cohort Construction**
+**Module 1 - Clinical Cohort Construction**
 - 8,000-patient longitudinal oncology cohort with demographics, insurance, socioeconomic variables, smoking history, BMI, and follow-up time
 - ECOG performance status, biomarker positivity, and line-of-therapy assignment
 - Preventive biologic therapy assignment with realistic confounding structures
@@ -31,20 +31,20 @@ This project builds that full stack — from synthetic cohort generation through
 - Competing treatment discontinuation events
 - Claims-style utilization and cost dataset generation
 
-**Module 2 — HEOR & Access Disparities**
+**Module 2 - HEOR & Access Disparities**
 - Therapy-access disparities by race/ethnicity and insurance type
 - Comparative progression burden across demographic groups
 - Logistic regression for treatment-access inequities
 - Cost disparity summaries across payer categories
 
-**Module 3 — Survival Analysis**
+**Module 3 - Survival Analysis**
 - Kaplan-Meier progression-free survival curves
 - Log-rank tests for treatment-group comparison
 - Cox proportional hazards model with multivariable adjustment
 - Schoenfeld residual diagnostics for PH assumption testing
 - Forest plot of hazard ratios with 95% confidence intervals
 
-**Module 4 — Causal Inference**
+**Module 4 - Causal Inference**
 - Propensity score estimation with positivity assessment
 - Stabilized IPTW weighting
 - Standardized mean difference (SMD) balance assessment
@@ -52,13 +52,13 @@ This project builds that full stack — from synthetic cohort generation through
 - Doubly robust AIPW estimator
 - E-value sensitivity analysis for unmeasured confounding
 
-**Module 5 — Missing Data**
+**Module 5 - Missing Data**
 - Structured MCAR/MAR missingness generation
 - Multiple imputation using MICE (m = 10)
 - Rubin pooled inference
 - Complete-case vs imputed estimate comparison
 
-**Module 6 — Competing Risks**
+**Module 6 - Competing Risks**
 - Cause-specific Cox regression
 - Fine-Gray subdistribution hazard modeling
 - Cumulative incidence functions (CIF)
@@ -101,7 +101,7 @@ This project builds that full stack — from synthetic cohort generation through
 | Weighting | Stabilized IPTW |
 | Balance assessment | Standardized mean differences (SMD) |
 | Causal estimator 1 | IPTW-weighted outcome model |
-| Causal estimator 2 | Augmented IPW (AIPW) — doubly robust |
+| Causal estimator 2 | Augmented IPW (AIPW) - doubly robust |
 | Sensitivity analysis | E-value (VanderWeele & Ding, 2017) |
 | Visualization | ggplot2, Shiny, bslib |
 | Standards alignment | ICH E9(R1), FDA RWE guidance |
@@ -152,7 +152,7 @@ source("scripts/06_competing_risks.R")
 shiny::runApp("shiny/")
 
 # Render Quarto report
-quarto::quarto_render("pubhealth_report.qmd")
+quarto::quarto_render("clinicalrwe_report.qmd")
 ```
 
 ---
