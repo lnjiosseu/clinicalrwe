@@ -1,6 +1,7 @@
 ---
 title: "ClinicalRWE: Oncology Real-World Evidence Study"
 author: "Ludovic Njiosseu"
+date: today
 format:
   html:
     toc: true
@@ -13,12 +14,6 @@ execute:
   warning: false
   message: false
 ---
-
-```{r}
-library(tidyverse)
-library(readr)
-library(knitr)
-```
 
 # Executive Summary
 
@@ -88,6 +83,7 @@ Treatment discontinuation due to adverse event or toxicity.
 # Baseline Characteristics
 
 ```{r}
+library(readr)
 table1 <- read_csv("outputs/table1_baseline.csv", show_col_types = FALSE)
 knitr::kable(table1, caption = "Table 1: Baseline Characteristics by Therapy Group")
 ```
