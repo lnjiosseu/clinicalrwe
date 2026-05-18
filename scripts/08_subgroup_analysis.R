@@ -6,7 +6,7 @@
 # =============================================================================
 
 library(tidyverse)
-library(survival)
+library(survival) 
 library(broom)
 
 cohort <- read_csv("data/cohort.csv", show_col_types = FALSE)

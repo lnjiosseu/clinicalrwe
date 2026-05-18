@@ -151,14 +151,14 @@ This project builds that full stack - from synthetic cohort generation through i
 ```text
 clinicalrwe/
 ├── scripts/
-│   ├── 01_simulate_data.R
-│   ├── 02_disparity_analysis.R
-│   ├── 03_survival_analysis.R
-│   ├── 04_causal_inference.R
-│   ├── 05_missing_data_mice.R
-│   ├── 06_competing_risks.R
-│   ├── 07_table1_baseline.R
-│   └── 08_subgroup_analysis.R
+│   ├── 01_simulate_data.R         # 8,000-patient cohort, claims, endpoints
+│   ├── 02_disparity_analysis.R    # HEOR: therapy access & cost disparities
+│   ├── 03_survival_analysis.R     # KM curves, log-rank, Cox PH, Schoenfeld
+│   ├── 04_causal_inference.R      # PS model, IPTW, AIPW, E-value, balance
+│   ├── 05_missing_data_mice.R     # MICE (m=10), Rubin's Rules, sensitivity
+│   ├── 06_competing_risks.R       # CIF, Gray's test, Fine-Gray vs cause-specific
+│   ├── 07_table1_baseline.R       # Table 1 by therapy group
+│   └── 08_subgroup_analysis.R     # Biomarker-stratified KM, HRs, interaction test
 ├── data/                         # Generated datasets (git-ignored)
 ├── outputs/                      # CSV/model artifacts (git-ignored)
 ├── plots/                        # Publication/dashboard figures
