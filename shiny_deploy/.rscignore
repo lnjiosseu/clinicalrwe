@@ -1,0 +1,6 @@
+.RData
+.Rhistory
+renv
+renv.lock
+.Rproj.user
+.git
